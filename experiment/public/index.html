@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Emotioncon study</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+    <script src="jspsych/dist/jspsych.js"></script>
+    <script src="jspsych/dist/plugin-instructions.js"></script>
+    <script src="jspsych/dist/plugin-instructions-min-viewing-time.js"></script>
+    <script src="jspsych/dist/plugin-survey-text.js"></script>
+    <script src="jspsych/dist/plugin-survey-multi-choice.js"></script>
+    <script src="jspsych/dist/plugin-html-keyboard-response.js"></script>
+    <script src="jspsych/dist/plugin-video-keyboard-response.js"></script>
+    <script src="jspsych/dist/plugin-html-button-response.js"></script>
+    <link href="jspsych/dist/jspsych.css" rel="stylesheet" type="text/css" />
+    <script src="jspsych/dist/plugin-fullscreen.js"></script>
+    <script src="jspsych/dist/plugin-html-multiple-slider-response.js"></script>
+    <script src="jspsych/dist/plugin-survey-likert.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script src="https://www.w3schools.com/lib/w3.js"></script>
+
+    <script src="prep/instructions.js"></script>
+    <script src="questionnaires/PHQ_9.js"></script>
+    <script src="questionnaires/GAD_7.js"></script>
+    <script src="questionnaires/DERS_18.js"></script>
+    <script src="prep/videosForExperiment.js"></script>
+    <script src="prep/attentionchecks.js"></script>
+    <script src="prep/interventionInstructions.js"></script>
+    <script src="emotioncon4vars.js"></script>
+    <script src="emotionconexp.js"></script>
+
+    <style>
+
+        body {
+            background-color: #c8c8c8
+        }
+
+        p {
+            color: black;
+            text-align: left;
+        }
+
+        .green {
+            color: #66fb66;
+        }
+
+        .orange {
+            color: #ff7f50;
+        }
+
+        li {
+            text-align: left;
+        }
+
+        p.right {
+            padding-top: 300px;
+        }
+
+        p.left {
+            padding-top: 300px;
+            padding-left: 260px;
+        }
+
+        p.wrong {
+            text-align: center;
+            color: red;
+            font-size: 400%;
+        }
+
+        .jspsych-target {
+            background-color: "#c8c8c8"
+        }
+
+        .container {
+            color: red;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .row::after {
+            content: "";
+            clear: both;
+            display: table;
+        }
+
+        .row {
+            width: 100%;
+        }
+
+        .col-1 {
+            width: 8.33%;
+        }
+
+        .col-2 {
+            width: 16.66%;
+        }
+
+        .col-3 {
+            width: 25%;
+        }
+
+        .col-4 {
+            width: 33.33%;
+        }
+
+        .col-5 {
+            width: 41.66%;
+        }
+
+        .col-6 {
+            width: 50%;
+        }
+
+        .col-7 {
+            width: 58.33%;
+        }
+
+        .col-8 {
+            width: 66.66%;
+        }
+
+        .col-9 {
+            width: 75%;
+        }
+
+        .col-10 {
+            width: 83.33%;
+        }
+
+        .col-11 {
+            width: 91.66%;
+        }
+
+        .col-12 {
+            width: 100%;
+        }
+
+        .col-300 {
+            width: 20px;
+        }
+
+        .col-600 {
+            width: 600px;
+        }
+
+        [class*="col-"] {
+            float: left;
+            padding: 15px;
+            border: none;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <!-- set up divs to write to -->
+    <div id="jspsych-target"></div>
+    <div class="form" id="mainSection">
+        <header class="form__header" id="header"><h2 id="header_title" class="form__title"></h2></header>
+        <section class="mainInstructions"><div id="consent"></div></section>
+    </div>
+
+    <!------------------------------ FIREBASE  -->
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.24.0/firebase-auth.js"></script>
+    <script>// Your web app's Firebase configuration
+        var firebaseConfig = {
+                apiKey: "AIzaSyBlvqQ4g6ooGmMDnfwk7HZk0Oh_JBtpEUg",
+                authDomain: "emotioncon2.firebaseapp.com",
+                projectId: "emotioncon2",
+                storageBucket: "emotioncon2.appspot.com",
+                messagingSenderId: "142414381132",
+                appId: "1:142414381132:web:af7b0c8a37af4cf7b9f4e9",
+                measurementId: "G-0NM4WMVRWL"
+            };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);</script>
+
+</body>
+
+<script src="server/firebase_auth.js"></script>	<!-- anon login to firebase -->
+<script src="server/getprolificid.js"></script>	<!-- parse html to get prolific ID -->
+
+<script src="server/firestore_emotioncon.js"></script> <!-- setup data saving functions for firestore -->
+<script src="prep/informationConsentAndRun.js"></script> <!-- GET INFORMED CONSENT -->
+
+<script nomodule>alert(
+        "This browser doesn't support modules, so the study can't run. Please try the latest version of Chrome, Firefox or Safari!"
+    );</script>
+
+</html>
+

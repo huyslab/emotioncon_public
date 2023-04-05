@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "emotioncon",
+    "emo1": "emotioncon1"
+  },
+  "targets": {}
+}
