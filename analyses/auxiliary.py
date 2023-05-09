@@ -1,8 +1,9 @@
-﻿import numpy as np
+import numpy as np
 from numpy import ma
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+import statsmodels as stats
 
 class Auxiliary:
 
@@ -89,10 +90,15 @@ class Auxiliary:
 
         self.rotate_xticks_polar(ax)
         if (pval != None):
-            ax.set_rlim((0, np.max(y)+0.1))
-            for i in range(len(l)):
-                ax.annotate(self.pval_to_asterix(pval[i]), \
-                            xy=(ax.get_xticks()[i], np.max(y, axis=(1))[i] + 0.05), \
+            pval_corr = stats.stats.multitest.multipletests(pval, method='bonferroni')[1]
+            ax.set_rlim((0, np.max(y)+0.25))
+            for i in range(len(y)-1):
+                if self.pval_to_asterix(pval[i]) == self.pval_to_asterix(pval_corr[i]):
+                    note = self.pval_to_asterix(pval[i])
+                else:
+                    note = self.pval_to_asterix(pval[i]) + ' $^($' + self.pval_to_asterix(pval_corr[i]) + '$^)$'
+                ax.annotate(note, \
+                            xy=(ax.get_xticks()[i], np.max(y, axis=(1))[i] + 0.1), \
                             ha='center', va='center')
                 
     def plot_matrices(self, controls, dynamics, group, mood_categories):
