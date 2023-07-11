@@ -75,7 +75,13 @@ class Statistics:
     
     def make_df(self, data, df, data_labels):
         Nsj = len(df)
-        tmp = pd.DataFrame(np.hstack((data[:,:,0], data[:,:,1])).T, columns=data_labels)
+        if len(data.shape) > 2: 
+            d1 = data[:,:,0]
+            d2 = data[:,:,1]
+        else:
+            d1 = data[:,0]
+            d2 = data[:,1]
+        tmp = pd.DataFrame(np.hstack((d1, d2)).T, columns=data_labels)
         tmp['time'] = np.hstack((np.zeros(Nsj),np.ones(Nsj)))
         tmp['condition'] = 2*df['randomized_condition'].to_list()
         tmp['condition_time'] = tmp['time'] + tmp['condition'] * 2
@@ -84,7 +90,7 @@ class Statistics:
         return df_melted
 
 
-    def plot_group_difference(self, df, data_labels, data_name, pvalues=None, pairs=None, fig=None, ax=None):
+    def plot_group_difference(self, df, data_labels, data_name, pvalues=None, pairs=None, fig=None, ax=None, ms=None, test=None, showfliers=True):
         
         if pairs == None:
             pairs = []
@@ -98,8 +104,8 @@ class Statistics:
             'x': 'category',
             'y': 'rating',
             "hue": "condition_time",
-            "hue_order": [0,2,1,3],
-            "palette": {0: "plum", 1: "purple", 2: "lightgrey", 3: "grey"},
+            "hue_order": [2,0,3,1],
+            "palette": {0: "lightgrey", 1: "grey", 2: "plum", 3: "purple"},
             "showmeans": True,
         }
 
@@ -107,13 +113,17 @@ class Statistics:
         if fig == None: fig, ax = plt.subplots(figsize=[20,8])
             
         # Plot with seaborn
-        ax = sns.boxplot(ax=ax, **hue_plot_params)
+        ax = sns.boxplot(ax=ax, **hue_plot_params, showfliers = showfliers)
         ax.set_ylim(ax.get_ylim()) # solves weird bug in annotator
 
         # Add annotations
+        if ms == None: ms = "Holm-Bonferroni"
+        if ms == False: ms = None
+        if test == None: test = 'Mann-Whitney'
+            
         annotator = Annotator(ax, pairs, **hue_plot_params);
         if pvalues == None: 
-            annotator.configure(verbose=0, test='Mann-Whitney', comparisons_correction="Holm-Bonferroni")
+            annotator.configure(verbose=0, test=test, comparisons_correction=ms)
             annotator.apply_and_annotate()
         else: 
             annotator.configure(verbose=0)
