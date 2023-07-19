@@ -4,13 +4,21 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import statsmodels as stats
+from typing import Optional
 
 class Auxiliary:
 
     def __init__(self):
         pass
 
-    def convert_pvalue_to_asterisks(self, pvalue):
+    def convert_pvalue_to_asterisks(self, pvalue: float) -> str:
+        """
+        Convert p-value to asterisks notation.
+        Args:
+            pvalue (float): P-value.
+        Returns:
+            str: Asterisks notation for the p-value.
+        """
         if pvalue <= 0.0001:
             return "****"
         elif pvalue <= 0.001:
@@ -22,9 +30,17 @@ class Auxiliary:
         return "ns"
     
 
-    def plot_significance(self, ax, x, text):
+    def plot_significance(self, ax: object, x: np.array, text: list):
+        """
+        Plot significance markers on the given axis.
+        Args:
+            ax (Axes): Axes object for the plot.
+            x (ndarray): x-coordinates for the significance markers.
+            text (list): List of text labels for the significance markers.
+        Returns:
+            None.
+        """
         ylim = ax.get_ylim()
-        # ax.set_ylim(ylim[0], ylim[1] + max(ylim)/10)
         for i in range(len(text)):
             if '*' in text[i]:
                 text_len = len(text[i])
@@ -34,8 +50,16 @@ class Auxiliary:
             ax.hlines(max(ylim), x[i] - 0.5, x[i] + 0.5, 'black')
             
             
-    def pval_to_asterix(self, p, multiple_comparison=None):
-        if multiple_comparison == None: 
+    def pval_to_asterix(self, p: float, multiple_comparison: Optional[int]=None):
+        """
+        Convert p-value to asterisks notation with multiple comparison correction.
+        Args:
+            p (float): P-value.
+            multiple_comparison (int, optional): Number of multiple comparisons. Defaults to None.
+        Returns:
+            str: Asterisks notation for the p-value.
+        """
+        if multiple_comparison is None: 
             multiple_comparison = 1
         if p <= 0.001/multiple_comparison: 
             asterix = '***'
@@ -47,14 +71,22 @@ class Auxiliary:
             asterix = '$^{ns}$'
         return asterix
     
-    def create_annotation(self, data, pval=None, parametric=None):
+    def create_annotation(self, data: np.array, pval: Optional[object]=None, parametric: Optional[bool]=None) -> np.array:
+        """
+        Create annotation for the given data.
+        Args:
+            data (ndarray): Data matrix.
+            pval (ndarray, optional): P-values for the data. Defaults to None.
+            parametric (bool, optional): Whether the data is parametric. Defaults to None.
+        Returns:
+            ndarray: Annotation for the data.
+        """
         dim = np.shape(data)
         data = np.real(data)
         annotation = np.full(dim[0], np.nan, dtype=object)
         for i in range(dim[0]):
-            annotation[i] = str(np.round(np.nanmean(data[i,:]),3)) + '\n± ' \
-                            + str(np.round(np.nanstd(data[i,:]),2))
-
+            annotation[i] = str(np.round(np.nanmean(data[i, :], 3))) + '\n± ' \
+                            + str(np.round(np.nanstd(data[i, :], 2)))
 
             if pval is not None:
                 if pval[i] < 0.05:
@@ -63,33 +95,52 @@ class Auxiliary:
         return annotation  
     
     
-    def rotate_xticks_polar(self, ax):
+    def rotate_xticks_polar(self, ax: object):
+        """
+        Rotate x-tick labels in a polar plot.
+        Args:
+            ax (Axes): Axes object for the plot.
+        Returns:
+            None.
+        """
         angles = np.linspace(0,2*np.pi,len(ax.get_xticklabels())+1)
         angles[np.cos(angles) < 0] = angles[np.cos(angles) < 0] + np.pi
         angles = np.rad2deg(angles) + np.array([-90, -90, 90, -90, 90, -90])
         labels = []
         for label, angle in zip(ax.get_xticklabels(), angles):
-            x,y = label.get_position()
-            lab = ax.text(x,y, label.get_text(), transform=label.get_transform(),
+            x, y = label.get_position()
+            lab = ax.text(x, y, label.get_text(), transform=label.get_transform(),
                           ha=label.get_ha(), va=label.get_va())
             lab.set_rotation(angle)
             labels.append(lab)
         ax.set_xticklabels([])
         
         
-    def polar_plot(self, y, l, c, ax, plt, pval=None):
+    def polar_plot(self, y: np.array, l: list, c: object, ax: object, plt: object, pval: Optional[object]=None):
+        """
+        Create a polar plot.
+        Args:
+            y (ndarray): Data for the plot.
+            l (list): Labels for the plot.
+            c (str or list): Colors for the plot.
+            ax (Axes): Axes object for the plot.
+            plt: Plot object.
+            pval (ndarray, optional): P-values for the data. Defaults to None.
+        Returns:
+            None.
+        """
         x = np.linspace(0, 2 * np.pi, len(y))
 
         lines, labels = plt.thetagrids(range(0, 360, int(360/len(l))), (l))
 
         if len(y.shape) > 1:
             for i in range(y.shape[1]):
-                plt.plot(x, y[:,i], color=c[i], linewidth=3)
+                plt.plot(x, y[:, i], color=c[i], linewidth=3)
         else:
             plt.plot(x, y, color=c, linewidth=3)
 
         self.rotate_xticks_polar(ax)
-        if (pval != None):
+        if pval is not None:
             pval_corr = stats.stats.multitest.multipletests(pval, method='bonferroni')[1]
             ax.set_rlim((0, np.max(y)+0.25))
             for i in range(len(y)-1):
@@ -101,7 +152,17 @@ class Auxiliary:
                             xy=(ax.get_xticks()[i], np.max(y, axis=(1))[i] + 0.1), \
                             ha='center', va='center')
                 
-    def plot_matrices(self, controls, dynamics, group, mood_categories):
+    def plot_matrices(self, controls: dict, dynamics: dict, group: int, mood_categories: list):
+        """
+        Plot matrices for control and dynamics.
+        Args:
+            controls (dict): Control data.
+            dynamics (dict): Dynamics data.
+            group (int): Group index.
+            mood_categories (list): Mood categories.
+        Returns:
+            None.
+        """
         fig, axs = plt.subplots(3,2, figsize=[15,15])
         timepoint = ['before', 'after']
         parameter = ['control', 'dynamics']
