@@ -1,12 +1,37 @@
-## Analyses Details
+# Emotion Regulation Experiment Data Analysis
 
-This project involves analyzing data collected in an emotion regulation experiment. The project is composed of several Jupyter notebooks, each with a specific purpose:
+This repository contains the code for analyzing the data collected in an emotion regulation experiment. The project involves utilizing various Jupyter notebooks, each serving a specific purpose, to gain insights into the dynamics of emotion ratings. Below is an overview of the notebooks included in this project:
 
-- `kalman_simulations.ipynb`: Conducts simulations to infer the optimal length of the experiment using Kalman filtering techniques.
-- `loaddata.py`: Downloads raw data from Firebase and saves it to the `../data/` directory.
-- `prepdata.ipynb`: Downloads data from Firebase and preprocesses the data for further analyses and modelling.
-- `emotion_dynamics.ipynb`: Visualizes the emotion ratings and shows their complex dynamics, including their overlap with original ratings.
-- `basics_characteristics.ipynb`: Calculates basic characteristics of the data, such as the mean and variance before and after intervention and their relation to psychiatric symptoms.
-- `modelling_experiment.ipynb`: Fits a Kalman filter to the data to model the dynamics of emotion ratings.
-- `modelling_analysis.ipynb`: Analyzes the estimates of the dynamics obtained from the Kalman filter e.g. compares dynamics and controllability feature between intervention groups.
-- `paper_plots.ipynb`: Generates additional figures for the paper.
+## Notebooks Overview
+
+- `kalman_simulations.ipynb`: Conducts simulations to determine the optimal length of the experiment using advanced Kalman filtering techniques.
+
+- `prepdata.ipynb`: Downloads the data from Firebase and preprocesses it for subsequent analyses and modeling.
+
+- `emotion_dynamics.ipynb`: Visualizes the emotion ratings and explores their intricate dynamics, including their overlap with the original ratings from the Cowen & Keltner paper (PNAS, 2017).
+
+- `basics_characteristics.ipynb`: Calculates essential characteristics of the data, such as mean and variance before and after intervention, while exploring their potential relationship with psychiatric symptoms and test-retest of ratings.
+
+- `modelling_experiment.ipynb`: Focuses on fitting a Kalman filter to the data and compares different models to determine whether the different components of the Kalman Filter are necessary to provide a parsimonious account of the emotion ratings.
+
+- `parameter_recovery.ipynb`: Explors the recoverability of the dynamics and input weight matrix in the most parsiminous model.
+
+- `replicate_mean_effect.ipynb`: Replicates the distancing effect in mean ratings by adapting the dynamics or the
+input weights alone in simulations.
+
+- `modelling_analysis.ipynb`: Delves into the analysis of the estimates of the dynamics obtained from the Kalman filter, including comparisons between intervention groups, such as dynamics and controllability features and potential relationship with psychiatric symptoms.
+
+9. `paper_plots.ipynb`: Generates additional figures for the paper to provide visual support for the obtained results.
+
+
+## Prerequisites
+
+To run the code in this project, make sure you have installed Conda, and you can create the necessary environment using the `environment.yml` file provided.
+
+## Data Access
+
+The raw data used for this analysis is stored on `../data/`.
+
+
+
+

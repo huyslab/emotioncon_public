@@ -3,8 +3,10 @@ from numpy import ma
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
+from matplotlib.gridspec import SubplotSpec
 import statsmodels as stats
 from typing import Optional
+import scipy
 
 class Auxiliary:
 
@@ -143,6 +145,7 @@ class Auxiliary:
         if pval is not None:
             pval_corr = stats.stats.multitest.multipletests(pval, method='bonferroni')[1]
             ax.set_rlim((0, np.max(y)+0.25))
+            ax.set_rticks([])
             for i in range(len(y)-1):
                 if self.pval_to_asterix(pval[i]) == self.pval_to_asterix(pval_corr[i]):
                     note = self.pval_to_asterix(pval[i])
@@ -185,3 +188,45 @@ class Auxiliary:
             xticklabels=mood_categories, yticklabels=mood_categories, ax=axs[2,j])
             axs[2,j].set_title(parameter[j] + ' after - before')
         plt.tight_layout()
+        
+    def reg_coef(self, x: np.array, y: np.array, label: Optional[object]=None, color: Optional[object]=None, hue: Optional[object]=None, **kwargs):
+        """
+        Function to calculate and display correlation coefficients and p-values on the plot.
+        Args:
+            x (ndarray): Data for the x-axis.
+            y (ndarray): Data for the y-axis.
+            label:(object, optional): Plot label. Defaults to None.
+            color: (object, optional): Plot color. Defaults to None.
+            hue: Not used in this function (can be used for grouping).
+            **kwargs: Additional keyword arguments (not used in this function).
+        Returns:
+            None.
+        """
+        ax = plt.gca()
+        # Calculate the Pearson correlation coefficient (r) and the corresponding p-value (p).
+        r, p = scipy.stats.pearsonr(x, y)
+        # Format the p-value for display on the plot.
+        if p < 0.001:
+            p = '< 0.001'
+        else:
+            p = '= ' + str(np.round(p, 2))
+        # Annotate the plot with the calculated correlation coefficient (r) and p-value (p).
+        ax.annotate('r = ' + str(np.round(r, 2)) + '\np ' + p, xy=(0.25, 0.25), xycoords='axes fraction', ha='left')
+        ax.set_axis_off()
+        
+    def create_subtitle(self, fig: plt.Figure, grid: SubplotSpec, title: str):
+        """
+        Sign sets of subplots with a title.
+        Args:
+            fig (plt.Figure): The Figure object representing the entire figure.
+            grid (SubplotSpec): The SubplotSpec object representing the position of the title subplot.
+            title (str): The title to be displayed above the subplots.
+        Returns:
+            None.
+        """
+        row = fig.add_subplot(grid)
+        # the '\n' is important
+        row.set_title(f'{title}\n', fontweight='semibold')
+        # hide subplot
+        row.set_frame_on(False)
+        row.axis('off')

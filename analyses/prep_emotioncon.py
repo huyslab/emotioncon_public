@@ -150,12 +150,13 @@ class PrepEmotioncon:
             tuple: DataFrame, mood ratings array, symptoms array.
         """
         mood_rating_list, symptoms_list = [], []
-        df = pd.DataFrame
+        df = pd.DataFrame()
         
         for j, i in enumerate(data):
             mood_rating_list.append(i['ratings'])
             df.loc[j, 'randomized_condition'] = int(i['iddoc']['intervention_condition'] == 0)
             df.loc[j, 'randomized_videoset'] = i['iddoc']['videoset_condition']
+            df.loc[j, 'intervention_success_raw'] = i['datadoc']['intervention_sucess_response']
             df.loc[j, 'intervention_success'] = self.extract_intervention_success(i['datadoc']['intervention_sucess_response'])
             symptoms_list.append(i['symptoms'])
         mood_ratings = np.array(mood_rating_list).T

@@ -127,14 +127,20 @@ class Statistics:
         return df_melted
 
 
-    def plot_group_difference(self, df: pd.DataFrame, data_labels: list, data_name: str, pvalues: Optional[object]=None, pairs: Optional[list]=None, fig: Optional[object]=None, ax: Optional[object]=None, ms: Optional[str]=None, test: Optional[str]=None, showfliers: Optional[bool]=True) -> object:
+    def plot_group_difference(self, df: pd.DataFrame, data_labels: list, data_name: str, \
+                              pvalues: Optional[object]=None, pairs: Optional[list]=None, \
+                              fig: Optional[object]=None, ax: Optional[object]=None, \
+                              ms: Optional[str]=None, test: Optional[str]=None, \
+                              showfliers: Optional[bool]=True, alpha_adjusted: Optional[float]=0.05, \
+                             show_ns: Optional[bool]=True, show_legend: Optional[bool]=True, \
+                             legend_loc: Optional[object]=(1.04, 0)) -> object:
         """
         Plot group differences and perform statistical tests.
         Args:
             df (DataFrame): DataFrame for plotting.
             data_labels (list): List of data labels.
             data_name (str): Name of the data.
-            pvalues (ndarray, optional): P-values for statistical tests. Defaults to None.
+            pvalues (ndarray, list): P-values for statistical tests. Defaults to None.
             pairs (list, optional): List of pairs for annotation. Defaults to None.
             fig (Figure, optional): Figure object for the plot. Defaults to None.
             ax (Axes, optional): Axes object for the plot. Defaults to None.
@@ -177,6 +183,11 @@ class Statistics:
         if test is None:
             test = 'Mann-Whitney'
 
+        if pvalues is not None and show_ns==False:
+            sig_pairs = np.where(np.array(pvalues) <= alpha_adjusted)[0]
+            pairs = [pairs[i] for i in sig_pairs]
+            pvalues = [pvalues[i] for i in sig_pairs]
+
         annotator = Annotator(ax, pairs, **hue_plot_params)
         if pvalues is None:
             annotator.configure(verbose=0, test=test, comparisons_correction=ms)
@@ -186,12 +197,15 @@ class Statistics:
             annotator.set_pvalues_and_annotate(np.array(pvalues))
 
         # Label and show
-        ax.legend(loc=(1.04, 0), fontsize=16)
-        ax.set(xlabel='', title=data_name + ' before and after intervention')
-        ax.legend_.texts[0].set_text('before emotion regulation intervention')
-        ax.legend_.texts[1].set_text('before control intervention')
-        ax.legend_.texts[2].set_text('after emotion regulation intervention')
-        ax.legend_.texts[3].set_text('after control intervention')
+        if show_legend == True:
+            ax.legend(loc=legend_loc, fontsize=16)
+            ax.set(xlabel='', title=data_name + ' before and after intervention')
+            ax.legend_.texts[0].set_text('before emotion regulation intervention')
+            ax.legend_.texts[1].set_text('before control intervention')
+            ax.legend_.texts[2].set_text('after emotion regulation intervention')
+            ax.legend_.texts[3].set_text('after control intervention')
+        else:
+            ax.legend([])
         return fig, ax
     
     
@@ -230,3 +244,84 @@ class Statistics:
             float: T-statistic.
         """
         return scipy.stats.ttest_ind(x, y).statistic
+    
+    def detect_outlier(self, data: np.array) -> tuple:
+        """
+        Detect outliers in data using the Interquartile Range (IQR) method.
+        Args:
+            data (ndarray): Data array.
+        Returns:
+            ex (tuple): Indices of the outliers in the data.
+        """
+        Q1 = np.percentile(data, 25)
+        Q3 = np.percentile(data, 75)
+        IQR = 1.5 * (Q3 - Q1)
+        ex = np.where((data < Q1 - IQR) | (data > Q3 + IQR))
+        return ex
+
+    def exclude_outliers(self, data: np.array, kf_before: int, kf_after: int, results: str) -> tuple:
+        """
+        Excludes outliers from data based on eigenvalues and singular values.
+        Args:
+            data (ndarray): Data array.
+            kf_before (int): Determine which Kalman filter to use at t=0.
+            kf_after (int): Determine which Kalman filter to use at t=1.
+            results (str): Determine from where to take the Kalman filter estimates.
+        Returns:
+            tuple: Indices of excluded data and a boolean array indicating if data is an outlier.
+        """
+        Nsj = len(data)
+        ee, cc = np.empty((2,Nsj)), np.empty((5,2,Nsj))
+        for i in range(Nsj):
+            for j, p in enumerate([kf_before, kf_after]):
+                eigval,foo = np.linalg.eig(data[i][results][p].transition_matrices)
+                ee[j,i] = np.sort(np.real(eigval))[-1]
+                foo,cc[:,j,i],foo = np.linalg.svd(control.ctrb(data[i][results][p].transition_matrices, \
+                                                          data[i][results][p].control_matrix))
+
+        # exclude eigenvalues > 1
+        ex = np.where(ee[:,:] > 1)[1]
+        # exclude outliers in dominant singular value of controllability matrix
+        ex = np.hstack((ex, self.detect_outlier(cc[0,:,:])[1]))
+
+        ex_arr = np.zeros(len(data))  # Assuming an array size of 100, you can adjust this according to your requirements
+        ex_arr[np.unique(ex)] = 1
+
+        return ex, ex_arr == 1
+    
+    
+    def four_way_statistics(self, data: dict, df: pd.DataFrame) -> tuple:
+        """
+        Perform four-way statistical tests between different conditions.
+        Args:
+            data (dict): A dictionary containing mood ratings data for different mood categories.
+            df (DataFrame): DataFrame containing condition information.
+        Returns:
+            list: A list containing p-values for the statistical tests.
+        """
+
+        # Create an empty list to store p-values
+        tstats, pvalues = [], []
+        
+        n_mooditems = data.shape[0]
+        # Loop through mooditems
+        for m in range(n_mooditems):
+            # Get mood ratings data for the specific mood category
+            dd = data[m, :, :]
+
+            # Perform statistical tests for each condition (before and after)
+            for t in range(2):
+                # Two-sample t-test between condition 0 and condition 1 at time t
+                ttest = scipy.stats.ttest_ind(dd[df['randomized_condition'] == 0, t].T,
+                                               dd[df['randomized_condition'] == 1, t].T)
+                pvalues.append(ttest.pvalue)
+                tstats.append(ttest.statistic)
+
+                # Paired t-test between the same condition at time 0 and time 1
+                ttest = scipy.stats.ttest_rel(dd[df['randomized_condition'] == t, 0].T,
+                                               dd[df['randomized_condition'] == t, 1].T)
+                pvalues.append(ttest.pvalue)
+                tstats.append(ttest.statistic)
+
+        return tstats, pvalues
+
