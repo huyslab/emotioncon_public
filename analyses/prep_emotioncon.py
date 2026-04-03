@@ -174,7 +174,7 @@ class PrepEmotioncon:
         Nsj = len(data)
         controls, dynamics, noise = [dict() for i in range(3)]
         controls['matrix_alldata'], dynamics['matrix_alldata'] = [np.empty((5, 5, Nsj), dtype=np.complex_) for i in range(2)]
-        controls['matrix'], controls['vec'], dynamics['matrix'], dynamics['vec'] = [np.empty((5, 5, Nsj, 2), dtype=np.complex_) for i in range(4)]
+        controls['matrix'], controls['gramian'], controls['vec'], dynamics['matrix'], dynamics['vec'] = [np.empty((5, 5, Nsj, 2), dtype=np.complex_) for i in range(5)]
         controls['val'], controls['HL'], dynamics['val'], dynamics['HL'], dynamics['det'], noise['G'], noise['S'] = [np.empty((5, Nsj, 2), dtype=np.complex_) for i in range(7)]
         
         for sj, i in enumerate(data):
@@ -187,8 +187,10 @@ class PrepEmotioncon:
                 controls['matrix'][:, :, sj, k] = i['results_split'][j].control_matrix
                 dynamics['matrix'][:, :, sj, k] = i['results_split'][j].transition_matrices
                 
-                controllability = control.ctrb(i['results_split'][j].transition_matrices, i['results_split'][j].control_matrix)
-                u, s, vh = np.linalg.svd(controllability)
+                con_matrix = control.ctrb(i['results_split'][j].transition_matrices, i['results_split'][j].control_matrix)
+                con_gramian = con_matrix @ con_matrix.T
+                controls['gramian'][:, :, sj, k] = con_gramian
+                u, s, vh = np.linalg.svd(con_gramian)
                 controls['vec'][:, :, sj, k] = np.real(u)
                 controls['val'][:, sj, k] = np.real(s)
                 controls['HL'][:, sj, k] = np.log(0.5) / np.log(s)

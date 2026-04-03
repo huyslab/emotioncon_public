@@ -222,6 +222,8 @@ class Modelling:
                     kf = kf.em(obs, n_iter=1, control_inputs = options['inp'])
                     if options['constraint control']:
                         kf.control_matrix = np.diagflat(np.diag(kf.control_matrix))
+                    if options['diag dynamics']:
+                        kf.transition_matrices =  np.diagflat(np.diag(kf.transition_matrices))
                 else: 
                     kf = kf.em(obs, n_iter=1)
                 kf.observation_covariance = np.diagflat(np.diag(kf.observation_covariance))
@@ -231,6 +233,8 @@ class Modelling:
                 kf = kf.em(obs, n_iter=options['maxiter'], control_inputs = options['inp'])
                 if options['constraint control']:
                     kf.control_matrix = np.diagflat(np.diag(kf.control_matrix))
+                if options['diag dynamics']:
+                        kf.transition_matrices =  np.diagflat(np.diag(kf.transition_matrices))
             else: kf = kf.em(obs, n_iter=options['maxiter'])
         return kf
     
