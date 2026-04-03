@@ -21,8 +21,11 @@ input weights alone in simulations.
 
 - `modelling_analysis.ipynb`: Delves into the analysis of the estimates of the dynamics obtained from the Kalman filter, including comparisons between intervention groups, such as dynamics and controllability features and potential relationship with psychiatric symptoms.
 
-9. `paper_plots.ipynb`: Generates additional figures for the paper to provide visual support for the obtained results.
+- `paper_plots.ipynb`: Generates additional figures for the paper to provide visual support for the obtained results.
 
+- `revision_suggested_analyses.ipynb`: Contains supplementary analyses conducted in response to peer review, addressing reviewer requests not covered in the main analysis pipeline. This includes an extended test-retest reliability analysis of the repeated videos, a comparisons of alternative model specifications (e.g., diagonal vs. full state transition matrix), a random-effects analysis to characterise individual heterogeneity in model preferences and model fit diagnostics. Results from these analyses were incorporated into the revised manuscript to substantiate modelling choices and demonstrate robustness of the reported findings.
+
+- `parameter_recovery_per_subject.ipynb`: Validates Kalman filter parameter identifiability by simulating and re-fitting data for each of the 104 subjects across 100 runs, assessing recovery quality for model matrices and derived controllability metrics, and confirming that key group differences remain detectable across simulations.
 
 ## Prerequisites
 
