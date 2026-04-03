@@ -17,6 +17,6 @@
 
 - All figures and intermediate files can be found in the `results` folder.
 
-## Link to preprint:
+## Link to paper:
 
-http://acplab.org/wp-content/uploads/2023/04/MalamudHuysDistancingControllability2023.pdf
+https://elifesciences.org/reviewed-preprints/102780v1
